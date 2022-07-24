@@ -1,13 +1,42 @@
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Runtime.InteropServices;
+using System.Management;
 using Microsoft.ConfigurationManagement.DesiredConfigurationManagement;
 
 namespace ConfigManagerUtils.Utilities
 {
     public class Console
     {
+        internal class SearchResult
+        {
+            public string Name { get; set; }
+            public string InstanceKey { get; set; }
+            public ObjectContainerType Type { get; set; }
+            public string Path { get; set; }
+            internal SearchResult(string name, string instanceKey, ObjectContainerType type, string path) => (Name, InstanceKey, Type, Path) = (name, instanceKey, type, path);
+        }
 
+        private static string GetObjectFullPath(uint containerNodeId, ManagementScope scope)
+        {
+            string[] path = { };
+            ManagementObject? result = new ManagementObject();
+            uint parentId = 1;
+            while (parentId != 0)
+            {
+                ObjectQuery query = new ObjectQuery("Select Name, ParentContainerNodeID From SMS_ObjectContainerNode Where ContainerNodeID = '" + containerNodeId.ToString() + "'");
+                ManagementObjectSearcher searcher = new ManagementObjectSearcher(scope, query);
+                var sGet = from ManagementObject x in searcher.Get() select x;
+                result = sGet.FirstOrDefault();
+                if (result is not null) {
+                    path.Append(result.Properties["Name"].Value.ToString());
+                    parentId = Convert.ToUInt32(result.Properties["ParentContainerNodeID"].Value);
+                    containerNodeId = parentId;
+                }
+            }
+            
+            return Regex.Replace(string.Join(@"\", path), "^|$", @"\");
+        }
     }
     public class Software
     {

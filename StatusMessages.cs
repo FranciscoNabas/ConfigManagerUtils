@@ -2,7 +2,6 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Runtime.InteropServices;
 using ConfigManagerUtils.Utilities;
-using ConfigManagerUtils;
 
 namespace ConfigManagerUtils.StatusMessages
 {

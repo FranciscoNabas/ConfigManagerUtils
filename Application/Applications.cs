@@ -1110,7 +1110,7 @@ namespace ConfigManagerUtils.Applications
                         ObjectQuery query = new ObjectQuery("Select * From SMS_ObjectContainerNode Where Name = '" + node + "' And ObjectType = 6000");
                         ManagementObjectSearcher searcher = new ManagementObjectSearcher(scope, query);
                         ManagementObjectCollection result = searcher.Get();
-                        if (searcher.Get() is null) { throw new DirectoryNotFoundException("Invalid target path."); }
+                        if (result is null) { throw new DirectoryNotFoundException("Invalid target path."); }
                         var objNode = from ManagementObject x in result select x;
                         ManagementObject? targetNode = objNode.FirstOrDefault();
                         if (targetNode is not null)
