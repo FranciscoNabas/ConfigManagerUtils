@@ -5,6 +5,10 @@ using Microsoft.ConfigurationManagement.DesiredConfigurationManagement;
 
 namespace ConfigManagerUtils.Utilities
 {
+    public class Console
+    {
+
+    }
     public class Software
     {
         internal enum FormatMessageFlags : uint

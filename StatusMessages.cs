@@ -2,24 +2,10 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Runtime.InteropServices;
 using ConfigManagerUtils.Utilities;
+using ConfigManagerUtils;
 
 namespace ConfigManagerUtils.StatusMessages
 {
-    public class Module
-    {
-        private int Id { get;}
-        public String Name { get; }
-        public static Module SMSClient => new(1, "climsgs.dll");
-        public static Module SMSProvider => new(2, "provmsgs.dll");
-        public static Module SMSServer => new(3, "srvmsgs.dll");
-        private Module(int id, string name)
-        {
-            InternModule im = new InternModule(id, name);
-            Id = im.Id;
-            Name = im.Name;
-        }
-    }
-
     public enum Severity : uint
     {
         Information = 1073741824,
