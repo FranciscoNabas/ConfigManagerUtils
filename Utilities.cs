@@ -6,6 +6,7 @@ using Microsoft.ConfigurationManagement.DesiredConfigurationManagement;
 
 namespace ConfigManagerUtils.Utilities
 {
+    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
     public class Console
     {
         internal class SearchResult
@@ -17,9 +18,10 @@ namespace ConfigManagerUtils.Utilities
             internal SearchResult(string name, string instanceKey, ObjectContainerType type, string path) => (Name, InstanceKey, Type, Path) = (name, instanceKey, type, path);
         }
 
-        private static string GetObjectFullPath(uint containerNodeId, ManagementScope scope)
+        internal static string GetObjectFullPath(uint containerNodeId, ManagementScope scope)
         {
-            string[] path = { };
+            SortedList<int, string> path = new SortedList<int, string>();
+            int index = 0;
             ManagementObject? result = new ManagementObject();
             uint parentId = 1;
             while (parentId != 0)
@@ -29,13 +31,17 @@ namespace ConfigManagerUtils.Utilities
                 var sGet = from ManagementObject x in searcher.Get() select x;
                 result = sGet.FirstOrDefault();
                 if (result is not null) {
-                    path.Append(result.Properties["Name"].Value.ToString());
+                    string? name = result.Properties["Name"].Value.ToString();
+                    if (!string.IsNullOrEmpty(name)) { path.Add(index, name); }
                     parentId = Convert.ToUInt32(result.Properties["ParentContainerNodeID"].Value);
                     containerNodeId = parentId;
                 }
+                index ++;
             }
-            
-            return Regex.Replace(string.Join(@"\", path), "^|$", @"\");
+            string output = "";
+            for (int i = path.Count - 1; i >= 0; i--) { output += @"\" + path[i]; }
+
+            return Regex.Replace(output, "$", @"\");
         }
     }
     public class Software
