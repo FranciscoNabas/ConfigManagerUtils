@@ -1,11 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Text;
 using System.Management.Automation;
 using Microsoft.ConfigurationManagement.ApplicationManagement;
-using Microsoft.ConfigurationManagement.DesiredConfigurationManagement;
-using ConfigManagerUtils;
+using ConfigManagerUtils.Utilities;
 
 namespace ConfigManagerUtils.Applications.DeploymentTypes
 {
@@ -34,7 +29,7 @@ namespace ConfigManagerUtils.Applications.DeploymentTypes
             if (!contentPath.EndsWith("\\", StringComparison.Ordinal)) { contentPath = contentPath + "\\"; }
             if (!File.Exists(contentPath + installerName)) { throw new FileNotFoundException("File not found. Make sure the file path entered exists and it's accessible."); }
 
-            string productCode = Utilities.GetMsiProductCode(contentPath + installerName);
+            string productCode = Software.GetMsiProductCode(contentPath + installerName);
             UninstallString = "msiexec.exe /X " + productCode.Trim() + " /qn /norestart";
 
             ProductCode = productCode;
@@ -52,7 +47,7 @@ namespace ConfigManagerUtils.Applications.DeploymentTypes
             if (contentPath.EndsWith("\\", StringComparison.Ordinal) == false) { contentPath = contentPath + "\\"; }
             if (!File.Exists(contentPath + installerName)) { throw new FileNotFoundException("File not found. Make sure the file path entered exists and it's accessible."); }
 
-            string productCode = Utilities.GetMsiProductCode(contentPath + installerName);
+            string productCode = Software.GetMsiProductCode(contentPath + installerName);
             UninstallString = "msiexec.exe /X " + productCode.Trim() + " /qn /norestart";
 
             ProductCode = productCode;

@@ -1,10 +1,7 @@
-using System;
 using System.Text;
-using System.ComponentModel;
 using System.Text.RegularExpressions;
 using System.Runtime.InteropServices;
-using ConfigManagerUtils.Applications;
-using ConfigManagerUtils;
+using ConfigManagerUtils.Utilities;
 
 namespace ConfigManagerUtils.StatusMessages
 {
@@ -73,9 +70,9 @@ namespace ConfigManagerUtils.StatusMessages
             int bufferSize = 16384;
             StringBuilder output = new StringBuilder(bufferSize);
 
-            int result = Utilities.FormatMessage(
-                Utilities.FormatMessageFlags.FROM_HMODULE |
-                Utilities.FormatMessageFlags.IGNORE_INSERTS
+            int result = Software.FormatMessage(
+                Software.FormatMessageFlags.FROM_HMODULE |
+                Software.FormatMessageFlags.IGNORE_INSERTS
                 , mHandle
                 , (uint)severity | messageId
                 , 0
@@ -86,7 +83,7 @@ namespace ConfigManagerUtils.StatusMessages
 
             if (result == 0)
             {
-                string errMsg = Utilities.GetFormatedWin32Error();
+                string errMsg = Software.GetFormatedWin32Error();
                 NativeLibrary.Free(mHandle);
                 throw new SystemException(errMsg);
             }
@@ -110,9 +107,9 @@ namespace ConfigManagerUtils.StatusMessages
             int bufferSize = 16384;
             StringBuilder output = new StringBuilder(bufferSize);
 
-            int result = Utilities.FormatMessage(
-                Utilities.FormatMessageFlags.FROM_HMODULE |
-                Utilities.FormatMessageFlags.IGNORE_INSERTS
+            int result = Software.FormatMessage(
+                Software.FormatMessageFlags.FROM_HMODULE |
+                Software.FormatMessageFlags.IGNORE_INSERTS
                 , mHandle
                 , (uint)severity | messageId
                 , 0
@@ -123,7 +120,7 @@ namespace ConfigManagerUtils.StatusMessages
 
             if (result == 0)
             {
-                string errMsg = Utilities.GetFormatedWin32Error();
+                string errMsg = Software.GetFormatedWin32Error();
                 NativeLibrary.Free(mHandle);
                 throw new SystemException(errMsg);
             }
@@ -152,9 +149,9 @@ namespace ConfigManagerUtils.StatusMessages
             int bufferSize = 16384;
             StringBuilder output = new StringBuilder(bufferSize);
 
-            int result = Utilities.FormatMessage(
-                Utilities.FormatMessageFlags.FROM_HMODULE |
-                Utilities.FormatMessageFlags.IGNORE_INSERTS
+            int result = Software.FormatMessage(
+                Software.FormatMessageFlags.FROM_HMODULE |
+                Software.FormatMessageFlags.IGNORE_INSERTS
                 , mHandle
                 , (uint)_statusMessage.Severity | _statusMessage.MessageId
                 , 0
@@ -165,7 +162,7 @@ namespace ConfigManagerUtils.StatusMessages
 
             if (result == 0)
             {
-                string errMsg = Utilities.GetFormatedWin32Error();
+                string errMsg = Software.GetFormatedWin32Error();
                 NativeLibrary.Free(mHandle);
                 throw new SystemException(errMsg);
             }
