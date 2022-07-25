@@ -1,6 +1,5 @@
 using Microsoft.ConfigurationManagement.DesiredConfigurationManagement;
-using System.Globalization;
-using System.Text.RegularExpressions;
+using ConfigManagerUtils.Utilities;
 
 namespace ConfigManagerUtils.Applications.DetectionMethods
 {
@@ -48,7 +47,7 @@ namespace ConfigManagerUtils.Applications.DetectionMethods
         public FileOrFolder(string objectPath, string objectName, FileSystemType fileSystem)
         {
             if (!objectPath.EndsWith("\\", StringComparison.Ordinal)) { objectPath = objectPath + "\\"; }
-            Utilities.ValidadeLocalPath(objectPath + objectName);
+            Software.ValidadeLocalPath(objectPath + objectName);
 
             FileSystem = fileSystem;
             ObjectPath = objectPath;
@@ -60,7 +59,7 @@ namespace ConfigManagerUtils.Applications.DetectionMethods
         public FileOrFolder(string objectPath, string objectName, ObjectProperty property, ExpressionOperator _operator, string value, FileSystemType fileSystem)
         {
             if (!objectPath.EndsWith("\\", StringComparison.Ordinal)) { objectPath = objectPath + "\\"; }
-            Utilities.ValidadeLocalPath(objectPath + objectName);
+            Software.ValidadeLocalPath(objectPath + objectName);
 
             if (property == ObjectProperty.RegistryKeyExists || property == ObjectProperty.ProductVersion) {
                 throw new InvalidDataTypeException("Invalid data type. Cannot use RegistryKeyExists or ProductVersion with File or Folder.");
@@ -219,7 +218,7 @@ namespace ConfigManagerUtils.Applications.DetectionMethods
         public MsiEnhanced(string filePath)
         {
             if (!File.Exists(filePath)) { throw new FileNotFoundException("File not found. Make sure the file path entered exists and it's accessible."); }
-            string productCode = Utilities.GetMsiProductCode(filePath);
+            string productCode = Software.GetMsiProductCode(filePath);
 
             FilePath = filePath;
             ProductCode = productCode;
@@ -231,7 +230,7 @@ namespace ConfigManagerUtils.Applications.DetectionMethods
         public MsiEnhanced(string filePath, ExpressionOperator _operator, Version value)
         {
             if (!File.Exists(filePath)) { throw new FileNotFoundException("File not found. Make sure the file path entered exists and it's accessible."); }
-            string productCode = Utilities.GetMsiProductCode(filePath);
+            string productCode = Software.GetMsiProductCode(filePath);
 
             FilePath = filePath;
             ProductCode = productCode;
