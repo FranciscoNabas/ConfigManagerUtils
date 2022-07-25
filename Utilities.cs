@@ -3,19 +3,94 @@ using System.Text.RegularExpressions;
 using System.Runtime.InteropServices;
 using System.Management;
 using Microsoft.ConfigurationManagement.DesiredConfigurationManagement;
+using ConfigManagerUtils.Applications;
 
 namespace ConfigManagerUtils.Utilities
 {
     [System.Runtime.Versioning.SupportedOSPlatform("windows")]
     public class Console
     {
-        internal class SearchResult
+        public class SearchResult
         {
-            public string Name { get; set; }
-            public string InstanceKey { get; set; }
-            public ObjectContainerType Type { get; set; }
-            public string Path { get; set; }
-            internal SearchResult(string name, string instanceKey, ObjectContainerType type, string path) => (Name, InstanceKey, Type, Path) = (name, instanceKey, type, path);
+            public string? Name { get; set; }
+            public string? InstanceKey { get; set; }
+            public string? Type { get; set; }
+            public string? Path { get; set; }
+            internal SearchResult(string name, string instanceKey, string type, string path) => (Name, InstanceKey, Type, Path) = (name, instanceKey, type, path);
+            internal SearchResult() { }
+        }
+
+        public static List<SearchResult> SearchObject(string objectName, ObjectContainerType objectType, string siteServer)
+        {
+            ManagementScope scope = new ManagementScope("\\\\" + siteServer + "\\root\\SMS");
+            scope.Connect();
+            ObjectQuery? query = new ObjectQuery("Select Name From __NAMESPACE");
+            ManagementObjectSearcher searcher = new ManagementObjectSearcher(scope, query);
+
+            string? siteCode = Application.GetSiteCode(searcher);
+            scope = new ManagementScope("\\\\" + siteServer + "\\root\\SMS\\site_" + siteCode);
+            scope.Connect();
+
+            string queryExpression = "Select " + objectType.ClassPropertyName + ", " + objectType.ClassPropertyUniqueId +
+                                    " From " + objectType.UnderlyingClassName +
+                                    " Where " + objectType.ClassPropertyName + " Like '" + objectName + "'";
+            query = new ObjectQuery(queryExpression);
+            searcher = new ManagementObjectSearcher(scope, query);
+
+            List<SearchResult> result = new List<SearchResult>();
+            foreach (ManagementObject item in searcher.Get())
+            {
+                SearchResult single = new SearchResult();
+                ObjectQuery objContQuery = new ObjectQuery("Select * From SMS_ObjectContainerItem Where InstanceKey = '" + item.Properties[objectType.ClassPropertyUniqueId].Value.ToString() + "'");
+                ManagementObjectSearcher objContSearcher = new ManagementObjectSearcher(scope, objContQuery);
+
+                var sGet = from ManagementObject x in objContSearcher.Get() select x;
+                ManagementObject? objContResult = sGet.FirstOrDefault();
+
+                single.Name = item.Properties[objectType.ClassPropertyName].Value.ToString();
+                single.InstanceKey = item.Properties[objectType.ClassPropertyUniqueId].Value.ToString();
+                single.Type = objectType.Name;
+                if (objContResult is not null)
+                {
+                    single.Path = GetObjectFullPath(Convert.ToUInt32(objContResult.Properties["ContainerNodeID"].Value), scope);
+                }
+
+                result.Add(single);
+            }
+
+            return result;
+        }
+
+        public static List<SearchResult> SearchObject(string objectName, ObjectContainerType objectType, ManagementScope scope)
+        {
+            string queryExpression = "Select " + objectType.ClassPropertyName + ", " + objectType.ClassPropertyUniqueId +
+                                                " From " + objectType.UnderlyingClassName +
+                                                " Where " + objectType.ClassPropertyName + " Like '" + objectName + "'";
+            ObjectQuery query = new ObjectQuery(queryExpression);
+            ManagementObjectSearcher searcher = new ManagementObjectSearcher(scope, query);
+
+            List<SearchResult> result = new List<SearchResult>();
+            foreach (ManagementObject item in searcher.Get())
+            {
+                SearchResult single = new SearchResult();
+                ObjectQuery objContQuery = new ObjectQuery("Select * From SMS_ObjectContainerItem Where InstanceKey = '" + item.Properties[objectType.ClassPropertyUniqueId].Value.ToString() + "'");
+                ManagementObjectSearcher objContSearcher = new ManagementObjectSearcher(scope, objContQuery);
+
+                var sGet = from ManagementObject x in objContSearcher.Get() select x;
+                ManagementObject? objContResult = sGet.FirstOrDefault();
+
+                single.Name = item.Properties[objectType.ClassPropertyName].Value.ToString();
+                single.InstanceKey = item.Properties[objectType.ClassPropertyUniqueId].Value.ToString();
+                single.Type = objectType.Name;
+                if (objContResult is not null)
+                {
+                    single.Path = GetObjectFullPath(Convert.ToUInt32(objContResult.Properties["ContainerNodeID"].Value), scope);
+                }
+
+                result.Add(single);
+            }
+
+            return result;
         }
 
         internal static string GetObjectFullPath(uint containerNodeId, ManagementScope scope)
@@ -30,13 +105,14 @@ namespace ConfigManagerUtils.Utilities
                 ManagementObjectSearcher searcher = new ManagementObjectSearcher(scope, query);
                 var sGet = from ManagementObject x in searcher.Get() select x;
                 result = sGet.FirstOrDefault();
-                if (result is not null) {
+                if (result is not null)
+                {
                     string? name = result.Properties["Name"].Value.ToString();
                     if (!string.IsNullOrEmpty(name)) { path.Add(index, name); }
                     parentId = Convert.ToUInt32(result.Properties["ParentContainerNodeID"].Value);
                     containerNodeId = parentId;
                 }
-                index ++;
+                index++;
             }
             string output = "";
             for (int i = path.Count - 1; i >= 0; i--) { output += @"\" + path[i]; }

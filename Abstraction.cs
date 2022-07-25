@@ -81,36 +81,40 @@ namespace ConfigManagerUtils
     public abstract class ObjectContainerEnumeration : Enumeration
     {
         internal string UnderlyingClassName { get; private set; }
+        internal string ClassPropertyName { get; private set; }
+        internal string ClassPropertyUniqueId { get; private set; }
 
-        internal ObjectContainerEnumeration(int id, string name, string underlyingClassName)
+        internal ObjectContainerEnumeration(int id, string name, string underlyingClassName, string classPropertyName, string classPropertyUniqueId)
             : base(id, name)
-        { UnderlyingClassName = underlyingClassName; }
+        {
+            ClassPropertyName = classPropertyName;
+            ClassPropertyUniqueId = classPropertyUniqueId;
+            UnderlyingClassName = underlyingClassName;
+        }
     }
 
     public class ObjectContainerType : ObjectContainerEnumeration
     {
-        public static ObjectContainerType Package => new(2, "Package", "SMS_Package");
-        public static ObjectContainerType Advertisement => new(3, "Advertisement", "SMS_Advertisement");
-        public static ObjectContainerType Query => new(7, "Query", "SMS_Query");
-        public static ObjectContainerType Report => new(8, "Report", "SMS_Report");
-        public static ObjectContainerType MeteredProductRule => new(9, "MeteredProductRule", "SMS_MeteredProductRule");
-        public static ObjectContainerType ConfigurationItem => new(11, "ConfigurationItem", "SMS_ConfigurationItem");
-        public static ObjectContainerType OperatingSystemInstallPackage => new(14, "OperatingSystemInstallPackage", "SMS_OperatingSystemInstallPackage");
-        public static ObjectContainerType StateMigration => new(17, "StateMigration", "SMS_StateMigration");
-        public static ObjectContainerType ImagePackage => new(18, "ImagePackage", "SMS_ImagePackage");
-        public static ObjectContainerType BootImagePackage => new(19, "BootImagePackage", "SMS_BootImagePackage");
-        public static ObjectContainerType TaskSequence => new(20, "TaskSequence", "SMS_TaskSequencePackage");
-        public static ObjectContainerType DeviceSettingPackage => new(21, "DeviceSettingPackage", "SMS_DeviceSettingPackage");
-        public static ObjectContainerType DriverPackage => new(23, "DriverPackage", "SMS_DriverPackage");
-        public static ObjectContainerType Driver => new(25, "Driver", "SMS_Driver");
-        public static ObjectContainerType SoftwareUpdate => new(1011, "SoftwareUpdate", "SMS_SoftwareUpdate");
-        public static ObjectContainerType ConfigurationBaseline => new(2011, "ConfigurationBaseline", "SMS_ConfigurationItem");
-        public static ObjectContainerType DeviceCollection => new(5000, "DeviceCollection", "SMS_Collection");
-        public static ObjectContainerType UserCollection => new(5001, "UserCollection", "SMS_Collection");
-        public static ObjectContainerType Application => new(6000, "Application", "SMS_ApplicationLatest");
-        public static ObjectContainerType ConfigurationItem_ComplianceSettings => new(6001, "ConfigurationItem_ComplianceSettings", "SMS_ConfigurationItemLatest");
+        public static ObjectContainerType Package => new(2, "Package", "SMS_Package", "Name", "PackageID");
+        public static ObjectContainerType Advertisement => new(3, "Advertisement", "SMS_Advertisement", "AdvertisementName", "AdvertisementID");
+        public static ObjectContainerType Query => new(7, "Query", "SMS_Query", "Name", "QueryID");
+        public static ObjectContainerType MeteredProductRule => new(9, "MeteredProductRule", "SMS_MeteredProductRule", "OriginalFileName", "RuleID");
+        public static ObjectContainerType ConfigurationItem => new(11, "ConfigurationItem", "SMS_ConfigurationItem", "LocalizedDisplayName", "ModelName");
+        public static ObjectContainerType OperatingSystemInstallPackage => new(14, "OperatingSystemInstallPackage", "SMS_OperatingSystemInstallPackage", "Name", "PackageID");
+        public static ObjectContainerType ImagePackage => new(18, "ImagePackage", "SMS_ImagePackage", "Name", "PackageID");
+        public static ObjectContainerType BootImagePackage => new(19, "BootImagePackage", "SMS_BootImagePackage", "Name", "PackageID");
+        public static ObjectContainerType TaskSequence => new(20, "TaskSequence", "SMS_TaskSequencePackage", "Name", "PackageID");
+        public static ObjectContainerType DeviceSettingPackage => new(21, "DeviceSettingPackage", "SMS_DeviceSettingPackage", "Name", "PackageID");
+        public static ObjectContainerType DriverPackage => new(23, "DriverPackage", "SMS_DriverPackage", "Name", "PackageID");
+        public static ObjectContainerType Driver => new(25, "Driver", "SMS_Driver", "LocalizedDisplayName", "ModelName");
+        public static ObjectContainerType SoftwareUpdate => new(1011, "SoftwareUpdate", "SMS_SoftwareUpdate", "LocalizedDisplayName", "ModelName");
+        public static ObjectContainerType ConfigurationBaseline => new(2011, "ConfigurationBaseline", "SMS_ConfigurationItem", "LocalizedDisplayName", "ModelName");
+        public static ObjectContainerType DeviceCollection => new(5000, "DeviceCollection", "SMS_Collection", "Name", "CollectionID");
+        public static ObjectContainerType UserCollection => new(5001, "UserCollection", "SMS_Collection", "Name", "CollectionID");
+        public static ObjectContainerType Application => new(6000, "Application", "SMS_ApplicationLatest", "LocalizedDisplayName", "ModelName");
+        public static ObjectContainerType ConfigurationItem_ComplianceSettings => new(6001, "ConfigurationItem_ComplianceSettings", "SMS_ConfigurationItemLatest", "LocalizedDisplayName", "ModelName");
 
-        public ObjectContainerType(int id, string name, string underlyingClassName) : base(id, name, underlyingClassName) {}
+        public ObjectContainerType(int id, string name, string underlyingClassName, string classPropertyName, string classPropertyUniqueId) : base(id, name, underlyingClassName, classPropertyName, classPropertyUniqueId) {}
     }
     #endregion
     

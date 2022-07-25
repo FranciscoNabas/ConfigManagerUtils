@@ -1022,7 +1022,7 @@ namespace ConfigManagerUtils.Applications
                 ObjectQuery? query = new ObjectQuery("Select Name From __NAMESPACE");
                 ManagementObjectSearcher searcher = new ManagementObjectSearcher(scope, query);
 
-                string? siteCode = GetSiteCode(searcher); ;
+                string? siteCode = GetSiteCode(searcher);
                 scope = new ManagementScope("\\\\" + siteServer + "\\root\\SMS\\site_" + siteCode);
                 scope.Connect();
 
@@ -1085,7 +1085,7 @@ namespace ConfigManagerUtils.Applications
 
         }
 
-        private static string? GetSiteCode(ManagementObjectSearcher searcher)
+        internal static string? GetSiteCode(ManagementObjectSearcher searcher)
         {
 
             foreach (ManagementObject obj in searcher.Get())
