@@ -3,7 +3,6 @@ using System.Text.RegularExpressions;
 using System.Runtime.InteropServices;
 using System.Management;
 using Microsoft.ConfigurationManagement.DesiredConfigurationManagement;
-using ConfigManagerUtils.Applications;
 
 namespace ConfigManagerUtils.Utilities
 {
@@ -27,7 +26,7 @@ namespace ConfigManagerUtils.Utilities
             ObjectQuery? query = new ObjectQuery("Select Name From __NAMESPACE");
             ManagementObjectSearcher searcher = new ManagementObjectSearcher(scope, query);
 
-            string? siteCode = Application.GetSiteCode(searcher);
+            string? siteCode = GetSiteCode(searcher);
             scope = new ManagementScope("\\\\" + siteServer + "\\root\\SMS\\site_" + siteCode);
             scope.Connect();
 
@@ -118,6 +117,16 @@ namespace ConfigManagerUtils.Utilities
             for (int i = path.Count - 1; i >= 0; i--) { output += @"\" + path[i]; }
 
             return Regex.Replace(output, "$", @"\");
+        }
+        internal static string? GetSiteCode(ManagementObjectSearcher searcher)
+        {
+
+            foreach (ManagementObject obj in searcher.Get())
+            {
+                string? smsNamespace = obj.Properties["Name"].Value.ToString();
+                if (!string.IsNullOrEmpty(smsNamespace)) { obj.Dispose(); return smsNamespace.Replace("site_", ""); }
+            }
+            return null;
         }
     }
     public class Software
