@@ -1,3 +1,5 @@
+.vs
+.vs/*
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
@@ -16,3 +18,7 @@ obj
 obj/*
 bin
 bin/*
+
+# Release
+Release
+Release/*

@@ -1,7 +1,9 @@
 using System.Text;
+using System.IO;
 using System.Text.RegularExpressions;
 using System.Runtime.InteropServices;
 using ConfigManagerUtils.Utilities;
+using System.Reflection;
 
 namespace ConfigManagerUtils.StatusMessages
 {
@@ -48,9 +50,13 @@ namespace ConfigManagerUtils.StatusMessages
             IntPtr lModule = UnmanagedCode.GetModuleHandle(module.Name);
             if (lModule != IntPtr.Zero) { NativeLibrary.Free(lModule); }
 
+            string modulePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\" + module.Name;
             IntPtr mHandle = new IntPtr();
-            NativeLibrary.TryLoad(module.Name, out mHandle);
-            if (mHandle == IntPtr.Zero) { throw new FileLoadException("Error loading library " + module.Name); }
+            NativeLibrary.TryLoad(modulePath, out mHandle);
+            if (mHandle == IntPtr.Zero) {
+                string errMsg = Software.GetFormatedWin32Error();
+                throw new SystemException(module.Name + ": " + errMsg);
+            }
 
             int bufferSize = 16384;
             StringBuilder output = new StringBuilder(bufferSize);
@@ -85,8 +91,9 @@ namespace ConfigManagerUtils.StatusMessages
             IntPtr lModule = UnmanagedCode.GetModuleHandle(module.Name);
             if (lModule != IntPtr.Zero) { NativeLibrary.Free(lModule); }
 
+            string modulePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\" + module.Name;
             IntPtr mHandle = new IntPtr();
-            NativeLibrary.TryLoad(module.Name, out mHandle);
+            NativeLibrary.TryLoad(modulePath, out mHandle);
             if (mHandle == IntPtr.Zero) { throw new FileLoadException("Error loading library " + module.Name); }
 
             int bufferSize = 16384;
@@ -127,8 +134,9 @@ namespace ConfigManagerUtils.StatusMessages
             IntPtr lModule = UnmanagedCode.GetModuleHandle(_statusMessage.Module.Name);
             if (lModule != IntPtr.Zero) { NativeLibrary.Free(lModule); }
 
+            string modulePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\" + _statusMessage.Module.Name;
             IntPtr mHandle = new IntPtr();
-            NativeLibrary.TryLoad(_statusMessage.Module.Name, out mHandle);
+            NativeLibrary.TryLoad(modulePath, out mHandle);
             if (mHandle == IntPtr.Zero) { throw new FileLoadException("Error loading library " + _statusMessage.Module.Name); }
 
             int bufferSize = 16384;

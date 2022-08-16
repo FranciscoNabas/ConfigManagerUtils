@@ -1,9 +1,5 @@
 using System.Reflection;
-using System.Management.Automation;
-using System.ComponentModel;
-using Microsoft.ConfigurationManagement.DesiredConfigurationManagement.ExpressionOperators;
-using Microsoft.SystemsManagementServer.DesiredConfigurationManagement.Expressions;
-using ConfigManagerUtils.Applications;
+using ConfigManagerUtils.Collections;
 
 namespace ConfigManagerUtils
 {
@@ -16,7 +12,7 @@ namespace ConfigManagerUtils
         RegistryKeyExists,
         ProductVersion
     }
-    
+
     public abstract class Enumeration : IComparable
     {
         internal string Name { get; set; }
@@ -60,7 +56,7 @@ namespace ConfigManagerUtils
 
         // Other utility methods ...
     }
-    
+
     public class Module : Enumeration
     {
         public static Module SMSClient => new(1, "climsgs.dll");
@@ -68,13 +64,13 @@ namespace ConfigManagerUtils
         public static Module SMSServer => new(3, "srvmsgs.dll");
         public Module(int Id, string Name) : base(Id, Name) { }
     }
-    
+
     public abstract class EnhancedDetectionMethod
     {
         internal bool Is64Bit { get; set; }
 
         internal EnhancedDetectionMethod() { Is64Bit = true; }
-        
+
     }
 
     #region ObjectContainerType
@@ -114,10 +110,10 @@ namespace ConfigManagerUtils
         public static ObjectContainerType Application => new(6000, "Application", "SMS_ApplicationLatest", "LocalizedDisplayName", "ModelName");
         public static ObjectContainerType ConfigurationItem_ComplianceSettings => new(6001, "ConfigurationItem_ComplianceSettings", "SMS_ConfigurationItemLatest", "LocalizedDisplayName", "ModelName");
 
-        public ObjectContainerType(int id, string name, string underlyingClassName, string classPropertyName, string classPropertyUniqueId) : base(id, name, underlyingClassName, classPropertyName, classPropertyUniqueId) {}
+        public ObjectContainerType(int id, string name, string underlyingClassName, string classPropertyName, string classPropertyUniqueId) : base(id, name, underlyingClassName, classPropertyName, classPropertyUniqueId) { }
     }
     #endregion
-    
+
     #region  DataType
     public abstract class DataTypeEnumeration : Enumeration
     {
@@ -126,9 +122,9 @@ namespace ConfigManagerUtils
         protected DataTypeEnumeration(int id, Microsoft.SystemsManagementServer.DesiredConfigurationManagement.Expressions.DataType valueType)
             : base(id, valueType.Name)
         { ValueType = valueType; }
-        
+
     }
-    
+
     public class DataType : DataTypeEnumeration
     {
         public static DataType Boolean => new(1, Microsoft.SystemsManagementServer.DesiredConfigurationManagement.Expressions.DataType.Boolean);
@@ -159,7 +155,7 @@ namespace ConfigManagerUtils
         public DataType(int id, Microsoft.SystemsManagementServer.DesiredConfigurationManagement.Expressions.DataType valueType) : base(id, valueType) { }
     }
     #endregion
-    
+
     #region ExpressionOperator
     public abstract class ExpressionOperatorEnumeration : Enumeration
     {
@@ -200,4 +196,11 @@ namespace ConfigManagerUtils
     }
     #endregion
 
+}
+
+public abstract class CollectionRule
+{
+    internal string? RuleName { get; set; }
+    internal RuleType Type { get; private set; }
+    internal CollectionRule(RuleType type) { Type = type; }
 }

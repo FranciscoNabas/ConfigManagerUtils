@@ -1022,7 +1022,7 @@ namespace ConfigManagerUtils.Applications
                 ObjectQuery? query = new ObjectQuery("Select Name From __NAMESPACE");
                 ManagementObjectSearcher searcher = new ManagementObjectSearcher(scope, query);
 
-                string? siteCode = GetSiteCode(searcher);
+                string? siteCode = ConfigManagerUtils.Utilities.Console.GetSiteCode(searcher);
                 scope = new ManagementScope("\\\\" + siteServer + "\\root\\SMS\\site_" + siteCode);
                 scope.Connect();
 
@@ -1053,7 +1053,7 @@ namespace ConfigManagerUtils.Applications
                 ObjectQuery? query = new ObjectQuery("Select Name From __NAMESPACE");
                 ManagementObjectSearcher searcher = new ManagementObjectSearcher(scope, query);
 
-                string? siteCode = GetSiteCode(searcher);
+                string? siteCode = ConfigManagerUtils.Utilities.Console.GetSiteCode(searcher);
                 scope = new ManagementScope("\\\\" + siteServer + "\\root\\SMS\\site_" + siteCode);
                 scope.Connect();
 
@@ -1083,17 +1083,6 @@ namespace ConfigManagerUtils.Applications
             }
             catch (Exception) { throw; }
 
-        }
-
-        internal static string? GetSiteCode(ManagementObjectSearcher searcher)
-        {
-
-            foreach (ManagementObject obj in searcher.Get())
-            {
-                string? smsNamespace = obj.Properties["Name"].Value.ToString();
-                if (!string.IsNullOrEmpty(smsNamespace)) { obj.Dispose(); return smsNamespace.Replace("site_", ""); }
-            }
-            return null;
         }
 
         private static ManagementObject? ProcessApplicationPath(string path, ManagementScope scope)
