@@ -1,45 +1,42 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net6.0-windows</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <Optimize>False</Optimize>
+  </PropertyGroup>
+
   <ItemGroup>
-    <Reference Include="AdminUI.WqlQueryEngine">
-      <HintPath>..\..\..\Program Files (x86)\Microsoft Endpoint Manager\AdminConsole\bin\AdminUI.WqlQueryEngine.dll</HintPath>
-    </Reference>
-    <Reference Include="DcmObjectModel">
-      <HintPath>..\..\..\Program Files (x86)\Microsoft Endpoint Manager\AdminConsole\bin\DcmObjectModel.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.ConfigurationManagement.ApplicationManagement">
-      <HintPath>..\..\..\Program Files (x86)\Microsoft Endpoint Manager\AdminConsole\bin\Microsoft.ConfigurationManagement.ApplicationManagement.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.ConfigurationManagement.ApplicationManagement.MsiInstaller">
-      <HintPath>..\..\..\Program Files (x86)\Microsoft Endpoint Manager\AdminConsole\bin\Microsoft.ConfigurationManagement.ApplicationManagement.MsiInstaller.dll</HintPath>
-    </Reference>
-    <Reference Include="Microsoft.ConfigurationManagement.ManagementProvider">
-      <HintPath>..\..\..\Program Files (x86)\Microsoft Endpoint Manager\AdminConsole\bin\Microsoft.ConfigurationManagement.ManagementProvider.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Management.Automation">
-      <HintPath>..\..\..\Windows\Microsoft.Net\assembly\GAC_MSIL\System.Management.Automation\v4.0_3.0.0.0__31bf3856ad364e35\System.Management.Automation.dll</HintPath>
-    </Reference>
-    <Reference Include="System.Management">
-      <HintPath>..\..\..\Program Files\PowerShell\7\System.Management.dll</HintPath>
-    </Reference>
+    <None Include="..\..\..\Repositories\C#\ConfigManagerUtils\UnmanagedLibraries\CLIMSGS.DLL" Link="CLIMSGS.DLL">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+	  <None Include="..\..\..\Repositories\C#\ConfigManagerUtils\UnmanagedLibraries\PROVMSGS.DLL" Link="PROVMSGS.DLL">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Include="..\..\..\Repositories\C#\ConfigManagerUtils\UnmanagedLibraries\SRVMSGS.DLL" Link="SRVMSGS.DLL">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="CLIMSGS.DLL">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="PROVMSGS.DLL">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Update="SRVMSGS.DLL">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    <PackageReference Include="System.Management" Version="6.0.0" />
+    <PackageReference Include="System.Management.Automation" Version="7.2.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="DcmObjectModel">
+      <HintPath>..\..\..\..\Program Files (x86)\Microsoft Endpoint Manager\AdminConsole\bin\DcmObjectModel.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.ConfigurationManagement.ApplicationManagement">
+      <HintPath>..\..\..\..\Program Files (x86)\Microsoft Endpoint Manager\AdminConsole\bin\Microsoft.ConfigurationManagement.ApplicationManagement.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.ConfigurationManagement.ApplicationManagement.MsiInstaller">
+      <HintPath>..\..\..\..\Program Files (x86)\Microsoft Endpoint Manager\AdminConsole\bin\Microsoft.ConfigurationManagement.ApplicationManagement.MsiInstaller.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>
