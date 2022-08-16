@@ -1,6 +1,9 @@
 using Microsoft.ConfigurationManagement.DesiredConfigurationManagement;
 using ConfigManagerUtils.Utilities;
+using System;
+using System.IO;
 
+#nullable enable
 namespace ConfigManagerUtils.Applications.DetectionMethods
 {
     public enum RegistryRootKey
@@ -143,7 +146,7 @@ namespace ConfigManagerUtils.Applications.DetectionMethods
                     break;
 
                 case "String":
-                    _value = new string("");
+                    _value = new string('N', 'A');
                     break;
             }
             Value = _value;

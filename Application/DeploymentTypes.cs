@@ -1,7 +1,10 @@
 using System.Management.Automation;
 using Microsoft.ConfigurationManagement.ApplicationManagement;
 using ConfigManagerUtils.Utilities;
+using System.IO;
+using System;
 
+#nullable enable
 namespace ConfigManagerUtils.Applications.DeploymentTypes
 {
     public enum ScriptLanguage

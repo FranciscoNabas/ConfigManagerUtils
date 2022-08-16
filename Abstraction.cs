@@ -1,6 +1,10 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using ConfigManagerUtils.Collections;
 
+#nullable enable
 namespace ConfigManagerUtils
 {
     public enum ObjectProperty
@@ -45,7 +49,7 @@ namespace ConfigManagerUtils
 
         public override int GetHashCode()
         {
-            return HashCode.Combine(Name, Id);
+            return (Name, Id).GetHashCode();
         }
 
         public int CompareTo(object? other)

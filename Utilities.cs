@@ -3,10 +3,93 @@ using System.Text.RegularExpressions;
 using System.Runtime.InteropServices;
 using System.Management;
 using Microsoft.ConfigurationManagement.DesiredConfigurationManagement;
+using System.Collections.Generic;
+using System;
+using System.Linq;
+using System.IO;
 
+#nullable enable
 namespace ConfigManagerUtils.Utilities
 {
-    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
+    internal class UnmanagedCode
+    {
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        internal static extern IntPtr LoadLibrary(
+            string lpLibFileName
+        );
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        internal static extern bool FreeLibrary(
+            IntPtr hModule
+        );
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        public static extern IntPtr GetModuleHandle(
+            string lpModuleName
+        );
+        internal enum FormatMessageFlags : uint
+        {
+            ALLOCATE_BUFFER = 0x00000100,
+            ARGUMENT_ARRAY = 0x00002000,
+            FROM_HMODULE = 0x00000800,
+            FROM_STRING = 0x00000400,
+            FROM_SYSTEM = 0x00001000,
+            IGNORE_INSERTS = 0x00000200
+        }
+
+        [DllImport("msi.dll", CharSet = CharSet.Unicode, PreserveSig = true, SetLastError = true)]
+        internal static extern uint MsiOpenDatabase(
+            string szDatabasePath,
+            string szPersist,
+            out IntPtr phDatabase
+        );
+
+        [DllImport("msi.dll", CharSet = CharSet.Unicode, PreserveSig = true, SetLastError = true)]
+        internal static extern uint MsiDatabaseOpenView(
+            IntPtr hDatabase,
+            string szQuery,
+            out IntPtr phView
+        );
+
+        [DllImport("msi.dll", CharSet = CharSet.Unicode, PreserveSig = true, SetLastError = true)]
+        internal static extern uint MsiViewExecute(
+            IntPtr hView,
+            IntPtr hRecord
+        );
+
+        [DllImport("msi.dll", CharSet = CharSet.Unicode, PreserveSig = true, SetLastError = true)]
+        internal static extern uint MsiViewFetch(
+            IntPtr hView,
+            out IntPtr hRecord
+        );
+
+        [DllImport("msi.dll", CharSet = CharSet.Unicode, PreserveSig = true, SetLastError = true)]
+        internal static extern uint MsiRecordGetString(
+            IntPtr hRecord,
+            uint iField,
+            StringBuilder szValueBuf,
+            out uint pcchValueBuf
+        );
+
+        [DllImport("msi.dll", CharSet = CharSet.Unicode, PreserveSig = true, SetLastError = true)]
+        internal static extern uint MsiViewClose(
+            IntPtr hView
+        );
+
+        [DllImport("msi.dll", CharSet = CharSet.Unicode, PreserveSig = true, SetLastError = true)]
+        internal static extern uint MsiCloseHandle(
+            IntPtr hAny
+        );
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
+        internal static extern int FormatMessage(
+            FormatMessageFlags dwFlags,
+            IntPtr lpSource,
+            uint dwMessageId,
+            uint dwLanguageId,
+            StringBuilder msgOut,
+            uint nSize,
+            IntPtr Arguments
+        );
+    }
     public class Console
     {
         public class SearchResult
@@ -131,81 +214,17 @@ namespace ConfigManagerUtils.Utilities
     }
     public class Software
     {
-        internal enum FormatMessageFlags : uint
-        {
-            ALLOCATE_BUFFER = 0x00000100,
-            ARGUMENT_ARRAY = 0x00002000,
-            FROM_HMODULE = 0x00000800,
-            FROM_STRING = 0x00000400,
-            FROM_SYSTEM = 0x00001000,
-            IGNORE_INSERTS = 0x00000200
-        }
-
-        [DllImport("msi.dll", CharSet = CharSet.Unicode, PreserveSig = true, SetLastError = true)]
-        internal static extern uint MsiOpenDatabase(
-            string szDatabasePath,
-            string szPersist,
-            out IntPtr phDatabase
-        );
-
-        [DllImport("msi.dll", CharSet = CharSet.Unicode, PreserveSig = true, SetLastError = true)]
-        internal static extern uint MsiDatabaseOpenView(
-            IntPtr hDatabase,
-            string szQuery,
-            out IntPtr phView
-        );
-
-        [DllImport("msi.dll", CharSet = CharSet.Unicode, PreserveSig = true, SetLastError = true)]
-        internal static extern uint MsiViewExecute(
-            IntPtr hView,
-            IntPtr hRecord
-        );
-
-        [DllImport("msi.dll", CharSet = CharSet.Unicode, PreserveSig = true, SetLastError = true)]
-        internal static extern uint MsiViewFetch(
-            IntPtr hView,
-            out IntPtr hRecord
-        );
-
-        [DllImport("msi.dll", CharSet = CharSet.Unicode, PreserveSig = true, SetLastError = true)]
-        internal static extern uint MsiRecordGetString(
-            IntPtr hRecord,
-            uint iField,
-            StringBuilder szValueBuf,
-            out uint pcchValueBuf
-        );
-
-        [DllImport("msi.dll", CharSet = CharSet.Unicode, PreserveSig = true, SetLastError = true)]
-        internal static extern uint MsiViewClose(
-            IntPtr hView
-        );
-
-        [DllImport("msi.dll", CharSet = CharSet.Unicode, PreserveSig = true, SetLastError = true)]
-        internal static extern uint MsiCloseHandle(
-            IntPtr hAny
-        );
-
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        internal static extern int FormatMessage(
-            FormatMessageFlags dwFlags,
-            IntPtr lpSource,
-            uint dwMessageId,
-            uint dwLanguageId,
-            StringBuilder msgOut,
-            uint nSize,
-            IntPtr Arguments
-        );
+        
 
         public static string GetFormatedWin32Error()
         {
-            IntPtr errLib = new IntPtr();
-            NativeLibrary.TryLoad("Ntdsbmsg.dll", out errLib);
+            IntPtr errLib = UnmanagedCode.LoadLibrary("Ntdsbmsg.dll");
             int lastWin32Error = Marshal.GetLastWin32Error();
             StringBuilder buffer = new StringBuilder(512);
 
-            int lResult = FormatMessage(
-                FormatMessageFlags.FROM_SYSTEM |
-                FormatMessageFlags.IGNORE_INSERTS
+            int lResult = UnmanagedCode.FormatMessage(
+                UnmanagedCode.FormatMessageFlags.FROM_SYSTEM |
+                UnmanagedCode.FormatMessageFlags.IGNORE_INSERTS
                 , IntPtr.Zero
                 , Convert.ToUInt32(lastWin32Error)
                 , 0
@@ -214,19 +233,18 @@ namespace ConfigManagerUtils.Utilities
                 , IntPtr.Zero
             );
 
-            NativeLibrary.Free(errLib);
+            UnmanagedCode.FreeLibrary(errLib);
             return buffer.ToString();
         }
 
         public static string GetFormatedWin32Error(int errorCode)
         {
-            IntPtr errLib = new IntPtr();
-            NativeLibrary.TryLoad("Ntdsbmsg.dll", out errLib);
+            IntPtr errLib = UnmanagedCode.LoadLibrary("Ntdsbmsg.dll");
             StringBuilder buffer = new StringBuilder(512);
 
-            int lResult = FormatMessage(
-                FormatMessageFlags.FROM_SYSTEM |
-                FormatMessageFlags.IGNORE_INSERTS
+            int lResult = UnmanagedCode.FormatMessage(
+                UnmanagedCode.FormatMessageFlags.FROM_SYSTEM |
+                UnmanagedCode.FormatMessageFlags.IGNORE_INSERTS
                 , IntPtr.Zero
                 , Convert.ToUInt32(errorCode)
                 , 0
@@ -235,7 +253,7 @@ namespace ConfigManagerUtils.Utilities
                 , IntPtr.Zero
             );
 
-            NativeLibrary.Free(errLib);
+            UnmanagedCode.FreeLibrary(errLib);
             return buffer.ToString();
         }
 
@@ -247,16 +265,16 @@ namespace ConfigManagerUtils.Utilities
             IntPtr view = new IntPtr();
             IntPtr record = new IntPtr();
 
-            uint result = MsiOpenDatabase(filePath, "MSIDBOPEN_READONLY", out database);
-            result = MsiDatabaseOpenView(database, "Select Property, Value From Property", out view);
-            result = MsiViewExecute(view, IntPtr.Zero);
-            result = MsiViewFetch(view, out record);
+            uint result = UnmanagedCode.MsiOpenDatabase(filePath, "MSIDBOPEN_READONLY", out database);
+            result = UnmanagedCode.MsiDatabaseOpenView(database, "Select Property, Value From Property", out view);
+            result = UnmanagedCode.MsiViewExecute(view, IntPtr.Zero);
+            result = UnmanagedCode.MsiViewFetch(view, out record);
 
             uint GetBufferSize(IntPtr _record, uint index)
             {
                 StringBuilder fetchBuff = new StringBuilder(1);
                 uint bSize = 0;
-                result = MsiRecordGetString(record, 2, fetchBuff, out bSize);
+                result = UnmanagedCode.MsiRecordGetString(record, 2, fetchBuff, out bSize);
                 return bSize + 1;
             }
 
@@ -269,24 +287,24 @@ namespace ConfigManagerUtils.Utilities
             {
                 bSize = GetBufferSize(record, 1);
                 buffer = new StringBuilder(Convert.ToInt32(bSize));
-                result = MsiRecordGetString(record, 1, buffer, out bSize);
+                result = UnmanagedCode.MsiRecordGetString(record, 1, buffer, out bSize);
 
                 if (buffer.ToString() == "ProductCode")
                 {
                     bSize = GetBufferSize(record, 2);
                     buffer = new StringBuilder(Convert.ToInt32(bSize));
-                    result = MsiRecordGetString(record, 2, buffer, out bSize);
+                    result = UnmanagedCode.MsiRecordGetString(record, 2, buffer, out bSize);
                     output = buffer.ToString();
                     break;
                 }
 
-                result = MsiViewFetch(view, out record);
+                result = UnmanagedCode.MsiViewFetch(view, out record);
             }
 
-            result = MsiCloseHandle(record);
-            result = MsiViewClose(view);
-            result = MsiCloseHandle(view);
-            result = MsiCloseHandle(database);
+            result = UnmanagedCode.MsiCloseHandle(record);
+            result = UnmanagedCode.MsiViewClose(view);
+            result = UnmanagedCode.MsiCloseHandle(view);
+            result = UnmanagedCode.MsiCloseHandle(database);
 
             return output;
         }

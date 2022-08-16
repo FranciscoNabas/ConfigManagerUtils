@@ -8,12 +8,13 @@ using Microsoft.SystemsManagementServer.DesiredConfigurationManagement.Expressio
 using Microsoft.SystemsManagementServer.DesiredConfigurationManagement.Rules;
 using ConfigManagerUtils.Applications.DeploymentTypes;
 using ConfigManagerUtils.Utilities;
+using System;
+using System.Linq;
+using System.IO;
 
+#nullable enable
 namespace ConfigManagerUtils.Applications
 {
-    
-
-    [System.Runtime.Versioning.SupportedOSPlatform("windows")]
     public class Application : Microsoft.ConfigurationManagement.ApplicationManagement.Application
     {
         public Application(ObjectId id) : base(id) { new Microsoft.ConfigurationManagement.ApplicationManagement.Application(id); }
@@ -209,7 +210,7 @@ namespace ConfigManagerUtils.Applications
             app.DisplayInfo.Add(displayInfo);
 
             id = new ObjectId("ScopeId_" + authoringScope, "DeploymentType_" + Guid.NewGuid().ToString());
-            if (!string.IsNullOrEmpty(deploymentType.InstallerName) && deploymentType.InstallerName.EndsWith(".msi"))
+            if (deploymentType.InstallerName != "" && deploymentType.InstallerName != null && deploymentType.InstallerName.EndsWith(".msi"))
             {
                 DeploymentType dt = new DeploymentType(id, MsiInstaller.TechnologyId);
                 dt.Title = "DT_" + applicationName + "_MSI";
@@ -409,7 +410,7 @@ namespace ConfigManagerUtils.Applications
             app.DisplayInfo.Add(displayInfo);
 
             id = new ObjectId("ScopeId_" + authoringScope, "DeploymentType_" + Guid.NewGuid().ToString());
-            if (!string.IsNullOrEmpty(deploymentType.InstallerName) && deploymentType.InstallerName.EndsWith(".msi"))
+            if (deploymentType.InstallerName != "" && deploymentType.InstallerName != null && deploymentType.InstallerName.EndsWith(".msi"))
             {
                 DeploymentType dt = new DeploymentType(id, MsiInstaller.TechnologyId);
                 dt.Title = "DT_" + applicationName + "_MSI";
@@ -509,7 +510,7 @@ namespace ConfigManagerUtils.Applications
             app.DisplayInfo.Add(displayInfo);
 
             id = new ObjectId("ScopeId_" + authoringScope, "DeploymentType_" + Guid.NewGuid().ToString());
-            if (!string.IsNullOrEmpty(deploymentType.InstallerName) && deploymentType.InstallerName.EndsWith(".msi"))
+            if (deploymentType.InstallerName != "" && deploymentType.InstallerName != null && deploymentType.InstallerName.EndsWith(".msi"))
             {
                 DeploymentType dt = new DeploymentType(id, MsiInstaller.TechnologyId);
                 dt.Title = "DT_" + applicationName + "_MSI";
@@ -1088,7 +1089,7 @@ namespace ConfigManagerUtils.Applications
         private static ManagementObject? ProcessApplicationPath(string path, ManagementScope scope)
         {
             string[] exclusions = new[] { "Software Library", "Overview", "Application Management", "Applications" };
-            string[] pathSplit = path.Split("\\");
+            string[] pathSplit = path.Split('\\');
             string lastNode = pathSplit.Last();
             if (lastNode != "Application")
             {
