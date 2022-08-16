@@ -1,10 +1,11 @@
 using System.Text;
 using System.IO;
 using System.Text.RegularExpressions;
-using System.Runtime.InteropServices;
 using ConfigManagerUtils.Utilities;
 using System.Reflection;
+using System;
 
+#nullable enable
 namespace ConfigManagerUtils.StatusMessages
 {
     public enum Severity : uint
@@ -12,15 +13,6 @@ namespace ConfigManagerUtils.StatusMessages
         Information = 1073741824,
         Warning = 2147483648,
         Error = 3221225472
-    }
-
-    internal class UnmanagedCode
-    {
-        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        public static extern IntPtr GetModuleHandle(
-            string lpModuleName
-        );
-
     }
 
     public class StatusMessage
@@ -48,11 +40,10 @@ namespace ConfigManagerUtils.StatusMessages
         public static string GetFormatedMessage(uint messageId, Severity severity, Module module)
         {
             IntPtr lModule = UnmanagedCode.GetModuleHandle(module.Name);
-            if (lModule != IntPtr.Zero) { NativeLibrary.Free(lModule); }
+            if (lModule != IntPtr.Zero) { UnmanagedCode.FreeLibrary(lModule); }
 
-            string modulePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\" + module.Name;
-            IntPtr mHandle = new IntPtr();
-            NativeLibrary.TryLoad(modulePath, out mHandle);
+            string modulePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\UnmanagedLibraries\\" + module.Name;
+            IntPtr mHandle = UnmanagedCode.LoadLibrary(modulePath);
             if (mHandle == IntPtr.Zero) {
                 string errMsg = Software.GetFormatedWin32Error();
                 throw new SystemException(module.Name + ": " + errMsg);
@@ -61,9 +52,9 @@ namespace ConfigManagerUtils.StatusMessages
             int bufferSize = 16384;
             StringBuilder output = new StringBuilder(bufferSize);
 
-            int result = Software.FormatMessage(
-                Software.FormatMessageFlags.FROM_HMODULE |
-                Software.FormatMessageFlags.IGNORE_INSERTS
+            int result = UnmanagedCode.FormatMessage(
+                UnmanagedCode.FormatMessageFlags.FROM_HMODULE |
+                UnmanagedCode.FormatMessageFlags.IGNORE_INSERTS
                 , mHandle
                 , (uint)severity | messageId
                 , 0
@@ -75,12 +66,12 @@ namespace ConfigManagerUtils.StatusMessages
             if (result == 0)
             {
                 string errMsg = Software.GetFormatedWin32Error();
-                NativeLibrary.Free(mHandle);
+                UnmanagedCode.FreeLibrary(mHandle);
                 throw new SystemException(errMsg);
             }
             else
             {
-                NativeLibrary.Free(mHandle);
+                UnmanagedCode.FreeLibrary(mHandle);
                 return output.ToString();
             }
 
@@ -89,19 +80,18 @@ namespace ConfigManagerUtils.StatusMessages
         public static string GetFormatedMessage(uint messageId, Severity severity, Module module, string[] insertString)
         {
             IntPtr lModule = UnmanagedCode.GetModuleHandle(module.Name);
-            if (lModule != IntPtr.Zero) { NativeLibrary.Free(lModule); }
+            if (lModule != IntPtr.Zero) { UnmanagedCode.FreeLibrary(lModule); }
 
-            string modulePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\" + module.Name;
-            IntPtr mHandle = new IntPtr();
-            NativeLibrary.TryLoad(modulePath, out mHandle);
+            string modulePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\UnmanagedLibraries\\" + module.Name;
+            IntPtr mHandle = UnmanagedCode.LoadLibrary(modulePath);
             if (mHandle == IntPtr.Zero) { throw new FileLoadException("Error loading library " + module.Name); }
 
             int bufferSize = 16384;
             StringBuilder output = new StringBuilder(bufferSize);
 
-            int result = Software.FormatMessage(
-                Software.FormatMessageFlags.FROM_HMODULE |
-                Software.FormatMessageFlags.IGNORE_INSERTS
+            int result = UnmanagedCode.FormatMessage(
+                UnmanagedCode.FormatMessageFlags.FROM_HMODULE |
+                UnmanagedCode.FormatMessageFlags.IGNORE_INSERTS
                 , mHandle
                 , (uint)severity | messageId
                 , 0
@@ -113,7 +103,7 @@ namespace ConfigManagerUtils.StatusMessages
             if (result == 0)
             {
                 string errMsg = Software.GetFormatedWin32Error();
-                NativeLibrary.Free(mHandle);
+                UnmanagedCode.FreeLibrary(mHandle);
                 throw new SystemException(errMsg);
             }
             else
@@ -124,7 +114,7 @@ namespace ConfigManagerUtils.StatusMessages
                 {
                     message = message.Replace("%" + (i + 1).ToString(), insertString[i]);
                 }
-                NativeLibrary.Free(mHandle);
+                UnmanagedCode.FreeLibrary(mHandle);
                 return message;
             }
 
@@ -132,19 +122,18 @@ namespace ConfigManagerUtils.StatusMessages
         public static string GetFormatedMessage(StatusMessage _statusMessage)
         {
             IntPtr lModule = UnmanagedCode.GetModuleHandle(_statusMessage.Module.Name);
-            if (lModule != IntPtr.Zero) { NativeLibrary.Free(lModule); }
+            if (lModule != IntPtr.Zero) { UnmanagedCode.FreeLibrary(lModule); }
 
-            string modulePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\" + _statusMessage.Module.Name;
-            IntPtr mHandle = new IntPtr();
-            NativeLibrary.TryLoad(modulePath, out mHandle);
+            string modulePath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "\\UnmanagedLibraries\\" + _statusMessage.Module.Name;
+            IntPtr mHandle = UnmanagedCode.LoadLibrary(modulePath);
             if (mHandle == IntPtr.Zero) { throw new FileLoadException("Error loading library " + _statusMessage.Module.Name); }
 
             int bufferSize = 16384;
             StringBuilder output = new StringBuilder(bufferSize);
 
-            int result = Software.FormatMessage(
-                Software.FormatMessageFlags.FROM_HMODULE |
-                Software.FormatMessageFlags.IGNORE_INSERTS
+            int result = UnmanagedCode.FormatMessage(
+                UnmanagedCode.FormatMessageFlags.FROM_HMODULE |
+                UnmanagedCode.FormatMessageFlags.IGNORE_INSERTS
                 , mHandle
                 , (uint)_statusMessage.Severity | _statusMessage.MessageId
                 , 0
@@ -156,7 +145,7 @@ namespace ConfigManagerUtils.StatusMessages
             if (result == 0)
             {
                 string errMsg = Software.GetFormatedWin32Error();
-                NativeLibrary.Free(mHandle);
+                UnmanagedCode.FreeLibrary(mHandle);
                 throw new SystemException(errMsg);
             }
             else
@@ -168,12 +157,12 @@ namespace ConfigManagerUtils.StatusMessages
                     {
                         message = message.Replace("%" + (i + 1).ToString(), _statusMessage.InsertString[i]);
                     }
-                    NativeLibrary.Free(mHandle);
+                    UnmanagedCode.FreeLibrary(mHandle);
                     return message;
                 }
                 else
                 {
-                    NativeLibrary.Free(mHandle);
+                    UnmanagedCode.FreeLibrary(mHandle);
                     return output.ToString();
                 }
 
